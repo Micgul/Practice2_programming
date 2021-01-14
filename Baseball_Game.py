@@ -1,3 +1,9 @@
+#해야하는 것
+#랜덤변수 중복없이 만들기
+#
+
+
+
 import random
 
 def randomNum(): #중복없는 랜덤숫자 만들기 (배열로 추출 )
@@ -17,7 +23,7 @@ print("Welcome To Baseball Game!")
 print("Push the three number")
 
 ranNum = randomNum() # 랜덤숫자 만듬
-print(ranNum) # 테스트용
+print("TEST:",ranNum) # 테스트용
 s_ct = 0 #스트라이크 카운트
 b_ct = 0 #볼 카운트
 
@@ -38,11 +44,11 @@ while(s_ct < 3):
         print("Input the non-duplicated number")
         continue
     else:
-        pass        #다른 예외 처리 필요
+        pass        #다른 예외 처리 필요 , try 사용해보자
 
     for i in range(0, 3):
         for j in range(0, 3):
-            if(i == j and str(ranNum[i]) == user_num[j]):
+            if(i == j and str(ranNum[i]) == user_num[j]):   # 문자열로 통일해서 비교
                 s_ct += 1
             elif(i != j and str(ranNum[i]) == user_num[j]):
                 b_ct += 1
