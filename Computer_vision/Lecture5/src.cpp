@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <Windows.h>
+
 void InverseImage(BYTE* Img, BYTE *Out, int W, int H)
 {
 	int ImgSize = W * H;
@@ -291,11 +292,13 @@ BYTE Median(BYTE* arr, int size)
 	{
 		for (int j = i + 1; j < size; j++) // 비교대상 index
 		{
-			if (arr[i] > arr[j]) 	swap(&arr[i], &arr[j]);
+			if (arr[i] > arr[j]) 	
+				swap(&arr[i], &arr[j]); //call by reference
 		}
 	}
 	return arr[S/2];
 }
+
 
 BYTE MaxPooling(BYTE* arr, int size)
 {
@@ -331,7 +334,7 @@ int main()
 	BITMAPINFOHEADER hInfo; // 40바이트
 	RGBQUAD hRGB[256]; // 1024바이트
 	FILE* fp;
-	fp = fopen("lenna_gauss.bmp", "rb");
+	fp = fopen("lenna_impulse.bmp", "rb");
 	if (fp == NULL) {
 		printf("File not found!\n");
 		return -1;
@@ -372,30 +375,30 @@ int main()
 	//ContrastAdj(Image, Output, hInfo.biWidth, hInfo.biHeight, 0.5);
 
 	/* Median filtering */
-	//BYTE temp[9];
-	//int W = hInfo.biWidth, H = hInfo.biHeight;
-	//int i, j;
-	//for (i = 1; i < H - 1; i++) {
-	//	for (j = 1; j < W - 1; j++) {
-	//		temp[0] = Image[(i - 1) * W + j-1];
-	//		temp[1] = Image[(i - 1) * W + j];
-	//		temp[2] = Image[(i - 1) * W + j+1];
-	//		temp[3] = Image[i * W + j-1];
-	//		temp[4] = Image[i * W + j];
-	//		temp[5] = Image[i * W + j+1];
-	//		temp[6] = Image[(i + 1) * W + j-1];
-	//		temp[7] = Image[(i + 1) * W + j];
-	//		temp[8] = Image[(i + 1) * W + j+1];
-	//		Output[i * W + j] = Median(temp, 9);
-	//		//Output[i * W + j] = MaxPooling(temp, 9);
-	//		//Output[i * W + j] = MinPooling(temp, 9);
-	//	}
-	//}
+	BYTE temp[9];
+	int W = hInfo.biWidth, H = hInfo.biHeight;
+	int i, j;
+	for (i = 1; i < H - 1; i++) {
+		for (j = 1; j < W - 1; j++) {
+			temp[0] = Image[(i - 1) * W + j-1];
+			temp[1] = Image[(i - 1) * W + j];
+			temp[2] = Image[(i - 1) * W + j+1];
+			temp[3] = Image[i * W + j-1];
+			temp[4] = Image[i * W + j];
+			temp[5] = Image[i * W + j+1];
+			temp[6] = Image[(i + 1) * W + j-1];
+			temp[7] = Image[(i + 1) * W + j];
+			temp[8] = Image[(i + 1) * W + j+1];
+			Output[i * W + j] = Median(temp, 9); //impulse 노이즈 없애기
+			//Output[i * W + j] = MaxPooling(temp, 9); //pepper 노이즈 없애기
+			//Output[i * W + j] = MinPooling(temp, 9); //salt 노이즈 없애기
+		}
+	}
 	/* Median filtering */
 
 	AverageConv(Image, Output, hInfo.biWidth, hInfo.biHeight);
 		
-	SaveBMPFile(hf, hInfo, hRGB, Output, hInfo.biWidth, hInfo.biHeight, "output_average.bmp");
+	SaveBMPFile(hf, hInfo, hRGB, Output, hInfo.biWidth, hInfo.biHeight, "output_median.bmp");
 
 
 	free(Image);
