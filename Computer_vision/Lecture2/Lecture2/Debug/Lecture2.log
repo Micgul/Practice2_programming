@@ -1,0 +1,4 @@
+﻿  lecture2.cpp
+E:\`상명 게임학과\4학년_1학기\컴퓨터비전\Computer_vision\Lecture2\Lecture2\lecture2.cpp(44,30): warning C4244: '=': 'double'에서 'BYTE'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+E:\`상명 게임학과\4학년_1학기\컴퓨터비전\Computer_vision\Lecture2\Lecture2\lecture2.cpp(202,1): warning C4326: 'main'의 반환 형식이 'int'이어야 하는데 'void'입니다.
+  Lecture2.vcxproj -> E:\`상명 게임학과\4학년_1학기\컴퓨터비전\Computer_vision\Lecture2\Debug\Lecture2.exe
