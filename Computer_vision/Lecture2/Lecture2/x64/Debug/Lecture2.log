@@ -1,0 +1,4 @@
+﻿  lecture.cpp
+D:\Github\Practice2_programming\Computer_vision\Lecture2\Lecture2\lecture.cpp(45,30): warning C4244: '=': 'double'에서 'BYTE'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Github\Practice2_programming\Computer_vision\Lecture2\Lecture2\lecture.cpp(206,1): warning C4326: 'main'의 반환 형식이 'int'이어야 하는데 'void'입니다.
+  Lecture2.vcxproj -> D:\Github\Practice2_programming\Computer_vision\Lecture2\x64\Debug\Lecture2.exe

@@ -31,7 +31,7 @@ void main()
 	fread(Image, sizeof(BYTE), ImgSize, fp);
 	fclose(fp);
 
-	SaveBMPFile(hf, hInfo, hRGB, Output, hInfo biWidth, hInfo biHeight, "output1.bmp");
+	SaveBMPFile(hf, hInfo, hRGB, Image, hInfo.biWidth, hInfo.biHeight, "output1.bmp");
 	
 	free(Image);
 	free(Output);
