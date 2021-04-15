@@ -396,6 +396,25 @@ int main()
 	}
 	/* Median filtering */
 
+	int Length = 3;  // 마스크의 한 변의 길이
+	int Margin = Length / 2;
+	int WSize = Length * Length;
+	BYTE* temp = (BYTE*)malloc(sizeof(BYTE) * WSize);
+	int W = hInfo.biWidth, H = hInfo.biHeight;
+	int i, j, m, n;
+	for (i = Margin; i < H - Margin; i++) {
+		for (j = Margin; j < W - Margin; j++) {
+			for (m = -Margin; m <= Margin; m++) {
+				for (n = -Margin; n <= Margin; n++) {
+					temp[(m + Margin) * Length + (n + Margin)] = Image[(i + m) * W + j + n];
+				}
+			}
+		Output[i * W + j] = Median(temp, WSize);
+		}
+	}
+
+	free(temp);
+
 	AverageConv(Image, Output, hInfo.biWidth, hInfo.biHeight);
 		
 	SaveBMPFile(hf, hInfo, hRGB, Output, hInfo.biWidth, hInfo.biHeight, "output_median.bmp");

@@ -1,0 +1,8 @@
+﻿  Lecture.cpp
+D:\Github\Practice2_programming\Computer_vision\Lecture\Lecture.cpp(44,30): warning C4244: '=': 'double'에서 'BYTE'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Github\Practice2_programming\Computer_vision\Lecture\Lecture.cpp(244,43): warning C4244: '=': 'long'에서 'BYTE'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Github\Practice2_programming\Computer_vision\Lecture\Lecture.cpp(264,43): warning C4244: '=': 'long'에서 'BYTE'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Github\Practice2_programming\Computer_vision\Lecture\Lecture.cpp(284,43): warning C4244: '=': 'long'에서 'BYTE'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Github\Practice2_programming\Computer_vision\Lecture\Lecture.cpp(304,43): warning C4244: '=': 'long'에서 'BYTE'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\Github\Practice2_programming\Computer_vision\Lecture\Lecture.cpp(324,43): warning C4244: '=': 'long'에서 'BYTE'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  Lecture.vcxproj -> D:\Github\Practice2_programming\Computer_vision\Lecture\Debug\Lecture.exe
