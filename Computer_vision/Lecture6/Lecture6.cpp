@@ -664,6 +664,7 @@ void DrawCrossLine(BYTE* Img, int W, int H)
 	}
 
 }
+
 //---------------------------------main------------------------------------
 int main()
 {

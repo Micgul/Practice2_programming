@@ -166,7 +166,7 @@ void Binarization(BYTE* Img, BYTE* Out, int W, int H, BYTE Threshold) //Threshol
 //		for (int i = T; i < High; i++)
 //		{
 //			G2 += i * Histo[i];
-//			Highdi += Histo[i];
+//			Lowdi += Histo[i];
 //		}
 //
 //		G2 = G2 / Highdi; //2번
@@ -188,6 +188,72 @@ void Binarization(BYTE* Img, BYTE* Out, int W, int H, BYTE Threshold) //Threshol
 //
 //	return T;
 //}
+BYTE DetermThGonzalez(int* H)
+{
+	BYTE ep = 3; //입실론
+	BYTE Low, High; // 최소, 최대값
+	BYTE Th, NewTh;
+	int G1 = 0, G2 = 0, cnt1 = 0, cnt2 = 0, mu1, mu2;
+	for (int i = 0; i < 256; i++)
+	{
+		if (H[i] != 0)
+		{
+			Low = i;
+			break;
+		}
+	}
+	for (int i = 255; i >= 0; i--)	
+	{
+		if (H[i] != 0)
+		{
+			High = i;
+			break;
+		}
+	}
+
+	Th = (Low + High) / 2; // 1단계
+
+	printf("%d\n", Th);
+
+	while (1) // 4단계 - If문 될때까지 무한반복
+	{
+		for (int i = Th + 1; i <= High; i++)
+		{
+			G1 += (H[i] * i);
+			cnt1 += H[i];
+		}
+		for (int i = Low; i <= Th; i++)
+		{
+			G2 += (H[i] * i);
+			cnt2 += H[i];
+		}
+		// 2단계
+
+		if (cnt1 == 0) cnt1 = 1; // 나눗셈 오류 예외처리
+		if (cnt2 == 0) cnt2 = 1;
+
+		mu1 = G1 / cnt1; //mu = 밝기의 평균값
+		mu2 = G2 / cnt2; //3단계
+
+		NewTh = (mu1 + mu2) / 2; // 4단계
+
+		if (abs(NewTh - Th) < ep)
+		{
+			Th = NewTh;
+			break;
+		}
+		else
+		{
+			Th = NewTh;
+		}
+		G1 = G2 = cnt1 = cnt2 = 0;
+		printf("%d\n", Th);
+	}
+
+	return Th;
+	
+}
+
 
 void AverageConv(BYTE* Img, BYTE* Out, int W, int H) // 박스평활화
 {
@@ -541,7 +607,7 @@ int main()
 	BITMAPINFOHEADER hInfo; // BMP 인포헤더 40Bytes
 	RGBQUAD hRGB[256]; // 팔레트 (256 * 4Bytes)
 	FILE* fp;
-	fp = fopen("pupil2.bmp", "rb");
+	fp = fopen("coin.bmp", "rb");
 	if (fp == NULL) {
 		printf("File not found!\n");
 		return -1;
@@ -561,18 +627,18 @@ int main()
 	int AHisto[256] = { 0 }; // 누적히스토그램 저장할 배열
 
 	//자동주석 : Ctrl+K+C 해제 : Ctrl+K+U
+	BYTE Th;
+	ObtainHistogram(Image, Histo, W, H); //히스토그램을 먼저 구함.
+	Th = DetermThGonzalez(Histo);
+	Binarization(Image, Output, W, H, Th);
 
-	Binarization(Image, Temp, W, H, 50); //임계치가 높아 잘 구분못할수도 있음.
-	InverseImage(Temp, Temp, W, H); //2진화된 영상Temp
-	m_BlobColoring(Temp, H, W);
-
-	for (int i = 0; i < ImgSize; i++) Output[i] = Image[i]; //전체 배열에 어떻게? Image[i] / 255하면 흰색 초기화
-	BinaryimageEdgeDetection(Temp, Output, W, H);
+	//동공 경계선 그리기
+	//Binarization(Image, Temp, W, H, 50); //임계치가 높아 잘 구분못할수도 있음.
+	//InverseImage(Temp, Temp, W, H); //2진화된 영상Temp
+	//m_BlobColoring(Temp, H, W);
+	//for (int i = 0; i < ImgSize; i++) Output[i] = Image[i]; //전체 배열에 어떻게? Image[i] / 255하면 흰색 초기화
+	//BinaryimageEdgeDetection(Temp, Output, W, H);
 	
-
-
-	/*ObtainHistogram(Image, Histo, hInfo.biWidth, hInfo.biHeight);
-	ObtainAHistogram(Histo, AHisto);*/
 
 	//Gonzalez 임계치 자동 결정 방법에 의해 이진화
 	//int Thres = GozalezBinThresh(Image, Output, Histo, hInfo.biWidth, hInfo.biHeight, 3); //입실론 값=3
@@ -633,12 +699,9 @@ int main()
 	//}
 	/* Median filtering */
 
-
-
-
 	//AverageConv(Image, Output, hInfo.biWidth, hInfo.biHeight);
 
-	SaveBMPFile(hf, hInfo, hRGB, Output, hInfo.biWidth, hInfo.biHeight, "pupil_edge2.bmp");
+	SaveBMPFile(hf, hInfo, hRGB, Output, hInfo.biWidth, hInfo.biHeight, "output_gonzalez.bmp");
 
 
 	free(Image);
