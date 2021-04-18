@@ -493,7 +493,7 @@ void m_BlobColoring(BYTE* CutImage, int height, int width)
 	// 가장 면적이 넓은 영역을 찾아내기 위함 
 	for (i = 1; i <= curColor; i++)
 	{
-		if (BlobArea[i] >= BlobArea[Out_Area]) Out_Area = i;
+		if (BlobArea[i] >= BlobArea[Out_Area]) Out_Area = i; //BlobArea 덩어리들의 양적 정보, Out_Area 가장 큰 것
 	}
 	// CutImage 배열 클리어~
 	for (k = 0; k < width * height; k++) CutImage[k] = 255;
@@ -502,8 +502,9 @@ void m_BlobColoring(BYTE* CutImage, int height, int width)
 	// coloring에 저장된 라벨링 결과중 (Out_Area에 저장된) 영역이 가장 큰 것만 CutImage에 저장
 	for (k = 0; k < width * height; k++)
 	{
-		//if (coloring[k] == Out_Area) CutImage[k] = 0;  // 가장 큰 것만 저장
-		CutImage[k] = (unsigned char)(coloring[k] * grayGap); // 라벨링 결과들 그대로 출력
+		if (coloring[k] == Out_Area) CutImage[k] = 0;  // 가장 큰 것만 저장하여 까맣게 칠함(size filtering)
+		//if (BlobArea[coloring[k]] > 500) CutImage[k] = 0; // 500덩어리(특정 면적) 이상만 출력
+		//CutImage[k] = (unsigned char)(coloring[k] * grayGap); // 모든 라벨링 결과들 그대로 출력
 		  //아까 나눈값(489줄) grayGap 각 컴포넌트들의 해당 밝기값을 채워줌
 	}
 
@@ -513,6 +514,25 @@ void m_BlobColoring(BYTE* CutImage, int height, int width)
 }
 // 라벨링 후 가장 넓은 영역에 대해서만 뽑아내는 코드 포함
 
+void BinaryimageEdgeDetection(BYTE* Bin, BYTE* Out, int W, int H)
+{
+	
+	for (int i = 0; i < H; i++)//경계 검출
+	{
+		for (int j = 0; j < W; j++)
+		{
+			if (Bin[i * W + j] == 0) //전경화소라면?
+			{
+				if (!(Bin[(i - 1) * W + j] == 0 && Bin[(i + 1) * W + j] == 0 &&
+					Bin[i * W + j - 1] == 0 && Bin[i * W + j + 1] == 0)) // 4방향 화소 중 하나라도 전경이아니라면
+				{
+					Out[i * W + j] = 255; //경계는 0으로 출력
+				}
+
+			}
+		}
+	}
+}
 
 //---------------------------------main------------------------------------
 int main()
@@ -521,7 +541,7 @@ int main()
 	BITMAPINFOHEADER hInfo; // BMP 인포헤더 40Bytes
 	RGBQUAD hRGB[256]; // 팔레트 (256 * 4Bytes)
 	FILE* fp;
-	fp = fopen("coin.bmp", "rb");
+	fp = fopen("pupil2.bmp", "rb");
 	if (fp == NULL) {
 		printf("File not found!\n");
 		return -1;
@@ -536,17 +556,24 @@ int main()
 	fread(Image, sizeof(BYTE), ImgSize, fp);
 	fclose(fp);
 
+	int H = hInfo.biHeight, W = hInfo.biWidth;
 	int Histo[256] = { 0 }; // 0으로 모두 초기화
 	int AHisto[256] = { 0 }; // 누적히스토그램 저장할 배열
-	
+
 	//자동주석 : Ctrl+K+C 해제 : Ctrl+K+U
 
-	Binarization(Image, Output, hInfo.biWidth, hInfo.biHeight, 100);
-	m_BlobColoring(Output, hInfo.biWidth, hInfo.biHeight);
+	Binarization(Image, Temp, W, H, 50); //임계치가 높아 잘 구분못할수도 있음.
+	InverseImage(Temp, Temp, W, H); //2진화된 영상Temp
+	m_BlobColoring(Temp, H, W);
+
+	for (int i = 0; i < ImgSize; i++) Output[i] = Image[i]; //전체 배열에 어떻게? Image[i] / 255하면 흰색 초기화
+	BinaryimageEdgeDetection(Temp, Output, W, H);
+	
+
 
 	/*ObtainHistogram(Image, Histo, hInfo.biWidth, hInfo.biHeight);
 	ObtainAHistogram(Histo, AHisto);*/
-	
+
 	//Gonzalez 임계치 자동 결정 방법에 의해 이진화
 	//int Thres = GozalezBinThresh(Image, Output, Histo, hInfo.biWidth, hInfo.biHeight, 3); //입실론 값=3
 	//Binarization(Image, Output, hInfo.biWidth, hInfo.biHeight, Thres);
@@ -606,12 +633,12 @@ int main()
 	//}
 	/* Median filtering */
 
-	
+
 
 
 	//AverageConv(Image, Output, hInfo.biWidth, hInfo.biHeight);
 
-	SaveBMPFile(hf, hInfo, hRGB, Output, hInfo.biWidth, hInfo.biHeight, "output_bmp.bmp");
+	SaveBMPFile(hf, hInfo, hRGB, Output, hInfo.biWidth, hInfo.biHeight, "pupil_edge2.bmp");
 
 
 	free(Image);
