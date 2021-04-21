@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <Windows.h>
+#include <math.h>
 
 //영상 반전
 void InverseImage(BYTE* Img, BYTE* Out, int W, int H)
@@ -600,6 +601,76 @@ void BinaryimageEdgeDetection(BYTE* Bin, BYTE* Out, int W, int H)
 	}
 }
 
+void VerticalFlip(BYTE * Img, int W, int H)
+{
+	for (int i = 0; i < H / 2; i++) //절반만 보게끔 , y좌표
+	{
+		for (int j = 0; j < W; j++) // x좌표
+		{
+			swap(&Img[i * W + j], &Img[(H - 1 - i) * W + j]);
+		}
+	}
+}
+
+void HorizontalFlip(BYTE* Img, int W, int H)
+{
+	for (int i = 0; i < W / 2; i++) // x좌표
+	{
+		for (int j = 0; j < H; j++) // y좌표
+		{
+			swap(&Img[j * W + i], &Img[j * W + (W - 1 - i)]);
+		}
+	}
+}
+
+void Translation(BYTE* Image, BYTE* Output, int W, int H, int Tx, int Ty)
+{
+	//int Tx = 00, Ty = 00; // 이동량
+	Ty *= -1;
+	
+	
+	for (int i = 0; i < H; i++)
+	{
+		for (int j = 0; j < W; j++)
+		{
+			if ((i + Ty < H && i + Ty >= 0) && (j + Tx < W && j + Tx >= 0))
+				Output[(i + Ty) * W + (j + Tx)] = Image[i * W + j]; // 순방향 사상
+		}
+	}
+}
+
+void Scaling(BYTE* Image, BYTE* Output, int W, int H, double SF_X, double SF_Y)
+{
+
+	int tmpX, tmpY;
+	for (int i = 0; i < H; i++)
+	{
+		for (int j = 0; j < W; j++)	// 역방향 사상
+		{
+			tmpX = (int)(j / SF_X);
+			tmpY = (int)(i / SF_Y);
+			if (tmpY < H && tmpX < W) //범위를 벗어나지 않는경우 만
+				Output[i * W + j] = Image[tmpY * W + tmpX];
+		}
+	}
+}
+
+void Rotation(BYTE* Image, BYTE* Output, int W, int H, int Angle)
+{
+	int tmpX, tmpY;
+	double Radian = Angle * 3.141592 / 180.0;
+	for (int i = 0; i < H; i++)
+	{
+		for (int j = 0; j < W; j++)
+		{
+			tmpX = (int)(cos(Radian) * j + sin(Radian) * i);
+			tmpY = (int)(-sin(Radian) * j + cos(Radian) * j);
+			if ((tmpY < H && tmpY >= 0) && (tmpX < W && tmpX >= 0))
+				Output[i * W + j] = Image[tmpY * W + tmpX]; // 역방향 사상
+		}
+	}
+}
+
 //---------------------------------main------------------------------------
 int main()
 {
@@ -607,7 +678,7 @@ int main()
 	BITMAPINFOHEADER hInfo; // BMP 인포헤더 40Bytes
 	RGBQUAD hRGB[256]; // 팔레트 (256 * 4Bytes)
 	FILE* fp;
-	fp = fopen("coin.bmp", "rb");
+	fp = fopen("lenna.bmp", "rb");
 	if (fp == NULL) {
 		printf("File not found!\n");
 		return -1;
@@ -627,10 +698,19 @@ int main()
 	int AHisto[256] = { 0 }; // 누적히스토그램 저장할 배열
 
 	//자동주석 : Ctrl+K+C 해제 : Ctrl+K+U
-	BYTE Th;
-	ObtainHistogram(Image, Histo, W, H); //히스토그램을 먼저 구함.
-	Th = DetermThGonzalez(Histo);
-	Binarization(Image, Output, W, H, Th);
+	
+	//VerticalFlip(Image, W, H);
+	//HorizontalFlip(Image, W, H);
+	//Translation(Image, Output, W, H, 100, 40);
+	//Scaling(Image, Output, W, H, 0.7, 0.7);
+	Rotation(Image, Output, W, H, 60); //원점을 중심으로 회전+ 
+	
+
+
+	//BYTE Th;
+	//ObtainHistogram(Image, Histo, W, H); //히스토그램을 먼저 구함.
+	//Th = DetermThGonzalez(Histo);
+	//Binarization(Image, Output, W, H, Th);
 
 	//동공 경계선 그리기
 	//Binarization(Image, Temp, W, H, 50); //임계치가 높아 잘 구분못할수도 있음.
@@ -699,11 +779,9 @@ int main()
 	//}
 	/* Median filtering */
 
-	//AverageConv(Image, Output, hInfo.biWidth, hInfo.biHeight);
 
-	SaveBMPFile(hf, hInfo, hRGB, Output, hInfo.biWidth, hInfo.biHeight, "output_gonzalez.bmp");
-
-
+	SaveBMPFile(hf, hInfo, hRGB, Output, hInfo.biWidth, hInfo.biHeight, "output_rotation.bmp");
+	
 	free(Image);
 	free(Output);
 	free(Temp);
